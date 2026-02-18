@@ -1,0 +1,92 @@
+﻿#include <GARLIC_API.h>
+
+char matriu_adfgvx[6][6];		// Matriu de xifrat ADFGVX
+extern int _ga_random();
+
+// Obtenir la longitud d'un string
+int mida_string(char *text) {
+    int len = 0;
+    while (text[len] != '\0') {
+        len++;
+    }
+    return len;
+}
+
+// Generaci� d'una matriu ADFGVX aleat�ria
+void generar_matriu_adfgvx() {
+    char simbols[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int usat[36] = {0};  // car�cters totals
+
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 6; j++) {
+            int index;
+            do {
+                index = (_ga_random()) % 36;  // Generar un �ndex v�lid
+            } while (usat[index]);  // Evitar repetir car�cters
+
+            matriu_adfgvx[i][j] = simbols[index];
+            usat[index] = 1;
+        }
+    }
+}
+
+// Per mostrar la matriu generada
+void imprimir_matriu_adfgvx() {
+    GARLIC_printf("Matriu ADFGVX generada:\n");
+	
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 6; j++) {
+            GARLIC_printf("%c ", matriu_adfgvx[i][j]);
+        }
+        GARLIC_printf("\n");
+    }
+}
+
+// Funci� per xifrar text amb ADFGVX
+void adfgvx_encrypt(char *input, char *output) {
+    char adfgvx[] = "ADFGVX";
+    int len = mida_string(input);
+    int pos = 0;
+
+    for (int i = 0; i < len; i++) {
+        char c = input[i];
+
+        // Buscar el car�cter a la matriu
+        int trobat = 0;
+        for (int row = 0; row < 6 && !trobat; row++) {
+            for (int col = 0; col < 6; col++) {
+                if (matriu_adfgvx[row][col] == c) {
+                    output[pos++] = adfgvx[row];  // Coordenada fila
+                    output[pos++] = adfgvx[col];  // Coordenada columna
+                    trobat = 1;
+                    break;
+                }
+            }
+        }
+        // Si el car�cter no es troba, l'ignorem
+    }
+
+    output[pos] = '\0';  // Final del string xifrat
+}
+
+// Programa d'usuari XF_1
+int xf1(int arg) {
+    generar_matriu_adfgvx();
+    imprimir_matriu_adfgvx();
+
+    char missatge_1[] = "HELLO";
+    char xifrat_1[128];
+    adfgvx_encrypt(missatge_1, xifrat_1);
+
+    GARLIC_printf("Missatge original 1: %s\n", missatge_1);
+    GARLIC_printf("Text xifrat 1: %s\n", xifrat_1);
+
+    char missatge_2[] = "ESTRUCTURA DE SISTEMES OPERATIUS";
+    char xifrat_2[128];
+    adfgvx_encrypt(missatge_2, xifrat_2);
+
+    GARLIC_printf("Missatge original 2: %s\n", missatge_2);
+    GARLIC_printf("Text xifrat 2: %s\n", xifrat_2);
+
+    return 0;
+}
